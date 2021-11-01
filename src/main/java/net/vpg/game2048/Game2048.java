@@ -3,7 +3,7 @@ package net.vpg.game2048;
 import java.util.Scanner;
 
 public class Game2048 {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) {
         String help = "Commands:\n" +
             "U to swipe up\n" +
             "D to swipe down\n" +
@@ -17,7 +17,6 @@ public class Game2048 {
         board.spawn();
         board.spawn();
         System.out.println(help);
-        Thread.sleep(2000);
         char command;
         String partingMessage = "";
         do {
