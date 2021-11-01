@@ -23,18 +23,25 @@ public class Board {
         return cells;
     }
 
-    public void move(Move move) {
+    public boolean move(Move move) {
+        return move(move, true);
+    }
+
+    public boolean move(Move move, boolean toMove) {
         int sign = move.forward ? 1 : -1;
+        Cell[][] board = toMove ? cells : Util.deepArrayCopy(cells);
+        boolean changedOverall = false;
         boolean changed;
         do {
             changed = false;
             if (move.horizontal) {
                 for (int i = move.forward ? 0 : size - 1; -1 < i && i < size; i += sign) {
                     for (int j = move.forward ? size - 1 : 0; move.forward ? j > 0 : j < size - 1; j -= sign) {
-                        Pair pair = cells[i][j - sign].tryMerge(cells[i][j]);
+                        Pair pair = board[i][j - sign].tryMerge(board[i][j]);
                         if (pair.isChanged()) {
-                            cells[i][j] = pair.getFirst();
-                            cells[i][j - sign] = pair.getSecond();
+                            board[i][j] = pair.getFirst();
+                            board[i][j - sign] = pair.getSecond();
+
                             changed = true;
                         }
                     }
@@ -42,17 +49,28 @@ public class Board {
             } else {
                 for (int i = move.forward ? 0 : size - 1; -1 < i && i < size; i += sign) {
                     for (int j = move.forward ? size - 1 : 0; move.forward ? j > 0 : j < size - 1; j -= sign) {
-                        Pair pair = cells[j - sign][i].tryMerge(cells[j][i]);
+                        Pair pair = board[j - sign][i].tryMerge(board[j][i]);
                         if (pair.isChanged()) {
-                            cells[j][i] = pair.getFirst();
-                            cells[j - sign][i] = pair.getSecond();
+                            board[j][i] = pair.getFirst();
+                            board[j - sign][i] = pair.getSecond();
                             changed = true;
                         }
                     }
                 }
             }
+            changedOverall |= changed;
         } while (changed);
-        spawn();
+        if (toMove)
+            spawn();
+        return changedOverall;
+    }
+
+    public boolean canMoveNext() {
+        boolean anyChange = false;
+        for (Move move : Move.values()) {
+            anyChange |= move(move, false);
+        }
+        return anyChange;
     }
 
     public void spawn() {

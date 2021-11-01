@@ -17,13 +17,13 @@ public class Game2048 {
         board.spawn();
         board.spawn();
         System.out.println(help);
-        String command;
+        char command;
         do {
             System.out.println(board);
-            command = in.next();
-            if (command.charAt(0) == 'E' || command.charAt(0) == 'e') {
-                System.out.println("Thanks for playing!");
-            } else if (command.charAt(0) == 'H' || command.charAt(0) == 'h') {
+            command = in.next().charAt(0);
+            if (command == 'E' || command == 'e') {
+                break;
+            } else if (command == 'H' || command == 'h') {
                 System.out.println(help);
             } else {
                 Move move = Move.fromKey(command);
@@ -32,7 +32,12 @@ public class Game2048 {
                     continue;
                 }
                 board.move(move);
+                if (!board.canMoveNext()) {
+                    System.out.println("You are out of moves! Game Over.");
+                    break;
+                }
             }
-        } while (command.charAt(0) != 'E' && command.charAt(0) != 'e');
+        } while (true);
+        System.out.println("Thanks for playing!");
     }
 }
