@@ -70,10 +70,10 @@ public class Board {
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 Cell cell = cells[i][j];
-                if (empty == spawnIndex) {
-                    cells[i][j] = spawner.spawn();
-                }
                 if (cell == Cell.C0) {
+                    if (empty == spawnIndex) {
+                        cells[i][j] = spawner.spawn();
+                    }
                     empty++;
                 }
             }
