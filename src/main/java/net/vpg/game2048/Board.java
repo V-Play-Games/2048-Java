@@ -65,12 +65,24 @@ public class Board {
         return changedOverall;
     }
 
-    public boolean canMoveNext() {
+    public boolean checkLose() {
         boolean anyChange = false;
         for (Move move : Move.values()) {
             anyChange |= move(move, false);
         }
-        return anyChange;
+        return !anyChange;
+    }
+
+    public boolean checkWin() {
+        boolean result = false;
+        for (Cell[] row : cells) {
+            for (Cell cell : row) {
+                if (result = cell.isFinal()) {
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     public void spawn() {
