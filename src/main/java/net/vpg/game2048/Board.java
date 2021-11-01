@@ -75,10 +75,11 @@ public class Board {
 
     public boolean checkWin() {
         boolean result = false;
+        outer:
         for (Cell[] row : cells) {
             for (Cell cell : row) {
                 if (result = cell.isFinal()) {
-                    break;
+                    break outer;
                 }
             }
         }
@@ -114,16 +115,16 @@ public class Board {
         StringBuilder tor = new StringBuilder();
         tor.append('+');
         tor.append("------+".repeat(size));
+        int firstLineLen = tor.length();
         tor.append('\n');
         for (Cell[] row : cells) {
-            tor.append('+');
+            tor.append('|');
             for (Cell cell : row) {
-                tor.append(' ').append(cell.getFormatted()).append(' ').append('+');
+                tor.append(' ').append(cell.getFormatted()).append(' ').append('|');
             }
             tor.append('\n');
         }
-        tor.append('+');
-        tor.append("------+".repeat(size));
+        tor.append(tor, 0, firstLineLen);
         return tor.toString();
     }
 }
