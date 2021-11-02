@@ -1,67 +1,139 @@
 package net.vpg.game2048;
 
-public enum Cell {
-    C0   (0,    "    ", false, 0, false),
-    C2   (2,    "  2 ", true,  9, false),
-    C4   (4,    "  4 ", true,  1, false),
-    C8   (8,    "  8 ", false, 0, false),
-    C16  (16,   " 16 ", false, 0, false),
-    C32  (32,   " 32 ", false, 0, false),
-    C64  (64,   " 64 ", false, 0, false),
-    C128 (128,  "128 ", false, 0, false),
-    C256 (256,  "256 ", false, 0, false),
-    C512 (512,  "512 ", false, 0, false),
-    C1024(1024, "1024", false, 0, false),
-    C2048(2048, "2048", false, 0, true );
+import static net.vpg.game2048.CellType.C0;
 
-    static final Cell[] values = values();
-    final String formatted;
-    final int value;
-    final boolean spawn;
-    final int spawnRate;
-    final boolean isFinal;
+public class Cell {
+    final Board board;
+    final int limit;
+    int row;
+    int column;
+    CellType type;
+    boolean modified;
 
-    Cell(int value, String formatted, boolean spawn, int spawnRate, boolean isFinal) {
-        this.value = value;
-        this.formatted = formatted;
-        this.spawn = spawn;
-        this.spawnRate = spawnRate;
-        this.isFinal = isFinal;
+    public Cell(int row, int column, Board board) {
+        this.row = row;
+        this.column = column;
+        this.board = board;
+        this.limit = board.size - 1;
+        this.type = C0;
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    public static Cell forValue(int value) {
-        assert value % 2 == 0;
-        int i = 0;
-        while (i < values.length && values[++i].value != value) ;
-        assert i != values.length;
-        return values[i];
+    public void move(Move move) {
+        switch (move) {
+            case UP:
+                moveUp();
+                break;
+            case DOWN:
+                moveDown();
+                break;
+            case LEFT:
+                moveLeft();
+                break;
+            case RIGHT:
+                moveRight();
+                break;
+        }
     }
 
-    public int getValue() {
-        return value;
+    public void moveDown() {
+        int initial = row;
+        while (row != limit && tryMerge(board.getCells()[row + 1][column])) ;
+        if (initial != 0) board.cells[initial - 1][column].moveDown();
     }
 
-    public String getFormatted() {
-        return formatted;
+    public void moveUp() {
+        int initial = row;
+        while (row != 0 && tryMerge(board.getCells()[row - 1][column])) ;
+        if (initial != limit) board.cells[initial + 1][column].moveUp();
     }
 
-    public boolean isSpawn() {
-        return spawn;
+    public void moveLeft() {
+        int initial = column;
+        while (column != limit && tryMerge(board.getCells()[row][column + 1])) ;
+        if (initial != 0) board.cells[row][initial - 1].moveLeft();
     }
 
-    public int getSpawnRate() {
-        return spawnRate;
+    public void moveRight() {
+        int initial = column;
+        while (column != 0 && tryMerge(board.getCells()[row][column - 1])) ;
+        if (initial != limit) board.cells[row][initial + 1].moveRight();
     }
 
-    public boolean isFinal() {
-        return isFinal;
+    public CellType getType() {
+        return type;
     }
 
-    public Pair tryMerge(Cell other) {
-        if (other == C0) return new Pair(this, C0, this != C0);
-        else if (this == C0) return new Pair(other, this, false);
-        else if (this == other) return new Pair(Cell.forValue(value * 2), C0, true);
-        else return new Pair(other, this, false);
+    public Cell setType(CellType type) {
+        this.type = type;
+        return this;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public Cell setRow(int row) {
+        this.row = row;
+        return this;
+    }
+
+    public int getColumn() {
+        return column;
+    }
+
+    public Cell setColumn(int column) {
+        this.column = column;
+        return this;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
+    public boolean isModified() {
+        return modified;
+    }
+
+    public Cell setModified(boolean modified) {
+        this.modified = modified;
+        return this;
+    }
+
+    private boolean tryMerge(Cell target) {
+        if (this.type == C0) return false;
+        if (target.type == C0) {
+            int temp = this.row;
+            this.row = target.row;
+            target.row = temp;
+
+            temp = this.column;
+            this.column = target.column;
+            target.column = temp;
+            board.cells[this.row][this.column] = this;
+            board.cells[target.row][target.column] = target;
+            return true;
+        }
+        if (target.type == this.type && !target.modified) {
+            target.type = CellType.forValue(this.type.getValue() * 2);
+            target.modified = true;
+            this.type = C0;
+            return false;
+        }
+        return false;
+    }
+
+    public boolean canMove() {
+        return (row != board.size - 1 && checkMove(board.getCells()[row + 1][column])) ||
+            (row != 0 && checkMove(board.getCells()[row - 1][column])) ||
+            (column != board.size - 1 && checkMove(board.getCells()[row][column + 1])) ||
+            (column != 0 && checkMove(board.getCells()[row][column - 1]));
+    }
+
+    private boolean checkMove(Cell target) {
+        return target.type == C0 || this.type == target.type;
+    }
+
+    public boolean isEmpty() {
+        return type == C0;
     }
 }

@@ -7,15 +7,15 @@ import java.util.stream.Collectors;
 
 public class Spawner {
     final Random random;
-    final List<Cell> spawnables;
+    final List<CellType> spawnables;
     final int size;
 
     public Spawner(Random random) {
         this.random = random;
-        this.spawnables = Arrays.stream(Cell.values())
-            .filter(Cell::isSpawn)
+        this.spawnables = Arrays.stream(CellType.values())
+            .filter(CellType::isSpawn)
             .map(cell -> {
-                Cell[] cells = new Cell[cell.getSpawnRate()];
+                CellType[] cells = new CellType[cell.getSpawnRate()];
                 Arrays.fill(cells, cell);
                 return cells;
             })
@@ -24,7 +24,7 @@ public class Spawner {
         size = spawnables.size();
     }
 
-    public Cell spawn() {
+    public CellType spawn() {
         return spawnables.get(random.nextInt(size));
     }
 }

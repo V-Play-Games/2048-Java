@@ -1,17 +1,21 @@
 package net.vpg.game2048;
 
 public enum Move {
-    UP(false, false),
-    DOWN(true, false),
-    LEFT(false, true),
-    RIGHT(true, true);
+    UP   (0, 0, 0, 1),
+    DOWN (1, 0, 0, 1),
+    RIGHT(0, 0, 1, 0),
+    LEFT (0, 1, 1, 0);
 
-    final boolean forward;
-    final boolean horizontal;
+    final int row;
+    final int column;
+    final int rowChange;
+    final int columnChange;
 
-    Move(boolean forward, boolean horizontal) {
-        this.forward = forward;
-        this.horizontal = horizontal;
+    Move(int row, int column, int rowChange, int columnChange) {
+        this.row = row;
+        this.column = column;
+        this.rowChange = rowChange;
+        this.columnChange = columnChange;
     }
 
     public static Move fromKey(String key) {
