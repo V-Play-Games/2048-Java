@@ -18,10 +18,6 @@ public enum Move {
         this.columnChange = columnChange;
     }
 
-    public static Move fromKey(String key) {
-        return fromKey(key.charAt(0));
-    }
-
     public static Move fromKey(char key) {
         switch (key) {
             case 'u':

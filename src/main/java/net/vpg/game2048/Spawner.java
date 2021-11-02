@@ -6,12 +6,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 public class Spawner {
+    private static final Spawner instance = new Spawner();
     final Random random;
     final List<CellType> spawnables;
     final int size;
 
-    public Spawner(Random random) {
-        this.random = random;
+    private Spawner() {
+        this.random = new Random();
         this.spawnables = Arrays.stream(CellType.values())
             .filter(CellType::isSpawn)
             .map(cell -> {
@@ -22,6 +23,10 @@ public class Spawner {
             .flatMap(Arrays::stream)
             .collect(Collectors.toList());
         size = spawnables.size();
+    }
+
+    public static Spawner getInstance() {
+        return instance;
     }
 
     public CellType spawn() {

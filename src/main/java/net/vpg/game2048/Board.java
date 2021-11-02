@@ -8,7 +8,6 @@ public class Board {
     final int size;
     final Cell[][] cells;
     final Random random;
-    final Spawner spawner;
 
     public Board(int size) {
         this.size = size;
@@ -19,7 +18,6 @@ public class Board {
             }
         }
         this.random = new Random();
-        this.spawner = new Spawner(random);
     }
 
     public Cell[][] getCells() {
@@ -55,7 +53,7 @@ public class Board {
     public void spawn() {
         Cell[] emptyCells = getCellsAsStream().filter(Cell::isEmpty).toArray(Cell[]::new);
         if (emptyCells.length == 0) return;
-        emptyCells[random.nextInt(emptyCells.length)].setType(spawner.spawn());
+        emptyCells[random.nextInt(emptyCells.length)].setType(Spawner.getInstance().spawn());
     }
 
     public String toString() {
