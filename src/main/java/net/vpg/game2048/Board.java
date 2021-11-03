@@ -1,20 +1,23 @@
 package net.vpg.game2048;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
 public class Board {
     final int size;
-    final Cell[][] cells;
+    Cell[][] cells;
+    Cell[][] alt;
     final Random random;
 
     public Board(int size) {
         this.size = size;
         this.cells = new Cell[size][size];
+        this.alt = new Cell[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                cells[i][j] = new Cell(i, j, this);
+                new Cell(i, j, this);
             }
         }
         this.random = new Random();
@@ -42,6 +45,51 @@ public class Board {
         }
     }
 
+    public void move2(Move move) {
+        switch (move) {
+            case LEFT:
+                reverse();
+                move2(Move.RIGHT);
+                reverse();
+                return;
+            case DOWN:
+                transpose();
+                move2(Move.LEFT);
+                transpose();
+                return;
+            case UP:
+                transpose();
+                move2(Move.RIGHT);
+                transpose();
+                return;
+        }
+        for (int i = 0; i < size; i++) {
+            cells[i][0].moveRight();
+        }
+        spawn();
+        for (Cell[] cellRow : cells) {
+            for (Cell cell : cellRow) {
+                cell.setModified(false);
+            }
+        }
+    }
+
+    void transpose() {
+        getCellsAsStream().forEach(Cell::transpose);
+        switchArrays();
+    }
+
+    void reverse() {
+        getCellsAsStream().forEach(Cell::reverse);
+        switchArrays();
+    }
+
+    private void switchArrays() {
+        Cell[][] backup = alt;
+        alt = cells;
+        cells = backup;
+    }
+
     public boolean checkLose() {
         return getCellsAsStream().noneMatch(Cell::canMove);
     }
@@ -51,9 +99,9 @@ public class Board {
     }
 
     public void spawn() {
-        Cell[] emptyCells = getCellsAsStream().filter(Cell::isEmpty).toArray(Cell[]::new);
-        if (emptyCells.length == 0) return;
-        emptyCells[random.nextInt(emptyCells.length)].setType(Spawner.getInstance().spawn());
+        Optional.of(getCellsAsStream().filter(Cell::isEmpty).toArray(Cell[]::new))
+            .filter(emptyCells  -> emptyCells.length != 0)
+            .ifPresent(emptyCells -> emptyCells[random.nextInt(emptyCells.length)].setType(Spawner.getInstance().spawn()));
     }
 
     public String toString() {

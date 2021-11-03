@@ -18,7 +18,6 @@ public class Game2048 {
         board.spawn();
         System.out.println(help);
         char command;
-        String partingMessage = "";
         do {
             System.out.println(board);
             command = in.next().charAt(0);
@@ -34,19 +33,17 @@ public class Game2048 {
                 }
                 board.move(move);
                 if (board.checkWin()) {
-                    partingMessage = "You won!";
+                    System.out.println(board);
+                    System.out.println("You won!");
                     break;
                 }
                 if (board.checkLose()) {
-                    partingMessage = "You are out of moves! Game Over.";
+                    System.out.println(board);
+                    System.out.println("You are out of moves! Game Over.");
                     break;
                 }
             }
         } while (true);
-        if (command != 'E' && command != 'e') {
-            System.out.println(board);
-            System.out.println(partingMessage);
-        }
         System.out.println("Thanks for playing!");
     }
 }

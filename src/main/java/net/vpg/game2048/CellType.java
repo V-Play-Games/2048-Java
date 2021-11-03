@@ -54,6 +54,10 @@ public enum CellType {
         return spawnRate;
     }
 
+    public boolean isEmpty() {
+        return value == 0;
+    }
+
     public boolean isFinal() {
         return isFinal;
     }

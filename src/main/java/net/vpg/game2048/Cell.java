@@ -5,17 +5,21 @@ import static net.vpg.game2048.CellType.C0;
 public class Cell {
     final Board board;
     final int limit;
+    Cell[][] current;
+    Cell[][] spare;
     int row;
     int column;
     CellType type;
     boolean modified;
 
     public Cell(int row, int column, Board board) {
-        this.row = row;
-        this.column = column;
+        this.current = board.cells;
+        this.spare = board.alt;
         this.board = board;
         this.limit = board.size - 1;
         this.type = C0;
+        setCoordinates(row, column);
+        spare[row][column] = this;
     }
 
     public void move(Move move) {
@@ -37,53 +41,50 @@ public class Cell {
 
     public void moveDown() {
         int initial = row;
-        while (row != limit && tryMerge(board.getCells()[row + 1][column])) ;
-        if (initial != 0) board.cells[initial - 1][column].moveDown();
+        while (row != limit && tryMerge(current[row + 1][column])) ;
+        if (initial != 0) current[initial - 1][column].moveDown();
     }
 
     public void moveUp() {
         int initial = row;
-        while (row != 0 && tryMerge(board.getCells()[row - 1][column])) ;
-        if (initial != limit) board.cells[initial + 1][column].moveUp();
+        while (row != 0 && tryMerge(current[row - 1][column])) ;
+        if (initial != limit) current[initial + 1][column].moveUp();
     }
 
     public void moveLeft() {
         int initial = column;
-        while (column != limit && tryMerge(board.getCells()[row][column + 1])) ;
-        if (initial != 0) board.cells[row][initial - 1].moveLeft();
+        while (column != limit && tryMerge(current[row][column + 1])) ;
+        if (initial != 0) current[row][initial - 1].moveLeft();
     }
 
     public void moveRight() {
         int initial = column;
-        while (column != 0 && tryMerge(board.getCells()[row][column - 1])) ;
-        if (initial != limit) board.cells[row][initial + 1].moveRight();
+        while (column != 0 && tryMerge(current[row][column - 1])) ;
+        if (initial != limit) current[row][initial + 1].moveRight();
     }
 
     public CellType getType() {
         return type;
     }
 
-    public Cell setType(CellType type) {
+    public void setType(CellType type) {
         this.type = type;
-        return this;
     }
 
     public int getRow() {
         return row;
     }
 
-    public Cell setRow(int row) {
+    public void setRow(int row) {
         this.row = row;
-        return this;
     }
 
     public int getColumn() {
         return column;
     }
 
-    public Cell setColumn(int column) {
+    public void setColumn(int column) {
         this.column = column;
-        return this;
     }
 
     public Board getBoard() {
@@ -94,23 +95,17 @@ public class Cell {
         return modified;
     }
 
-    public Cell setModified(boolean modified) {
+    public void setModified(boolean modified) {
         this.modified = modified;
-        return this;
     }
 
     private boolean tryMerge(Cell target) {
         if (this.type == C0) return false;
         if (target.type == C0) {
-            int temp = this.row;
-            this.row = target.row;
-            target.row = temp;
-
-            temp = this.column;
-            this.column = target.column;
-            target.column = temp;
-            board.cells[this.row][this.column] = this;
-            board.cells[target.row][target.column] = target;
+            int targetRow = target.row;
+            int targetCol = target.column;
+            target.setCoordinates(this.row, this.column);
+            this.setCoordinates(targetRow, targetCol);
             return true;
         }
         if (target.type == this.type && !target.modified) {
@@ -122,11 +117,33 @@ public class Cell {
         return false;
     }
 
+    void transpose() {
+        switchArrays();
+        setCoordinates(column, row);
+    }
+
+    void reverse() {
+        switchArrays();
+        setCoordinates(row, limit - column);
+    }
+
+    private void switchArrays() {
+        Cell[][] backup = spare;
+        spare = current;
+        current = backup;
+    }
+
+    void setCoordinates(int row, int column) {
+        this.row = row;
+        this.column = column;
+        current[row][column] = this;
+    }
+
     public boolean canMove() {
-        return (row != board.size - 1 && checkMove(board.getCells()[row + 1][column])) ||
-            (row != 0 && checkMove(board.getCells()[row - 1][column])) ||
-            (column != board.size - 1 && checkMove(board.getCells()[row][column + 1])) ||
-            (column != 0 && checkMove(board.getCells()[row][column - 1]));
+        return (row != board.size - 1 && checkMove(current[row + 1][column])) ||
+            (row != 0 && checkMove(current[row - 1][column])) ||
+            (column != board.size - 1 && checkMove(current[row][column + 1])) ||
+            (column != 0 && checkMove(current[row][column - 1]));
     }
 
     private boolean checkMove(Cell target) {
@@ -134,6 +151,6 @@ public class Cell {
     }
 
     public boolean isEmpty() {
-        return type == C0;
+        return type.isEmpty();
     }
 }
