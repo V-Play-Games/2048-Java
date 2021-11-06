@@ -3,8 +3,8 @@ package net.vpg.game2048;
 public enum Move {
     UP   (0, 0, 0, 1),
     DOWN (1, 0, 0, 1),
-    RIGHT(0, 0, 1, 0),
-    LEFT (0, 1, 1, 0);
+    LEFT (0, 0, 1, 0),
+    RIGHT(0, 1, 1, 0);
 
     final int row;
     final int column;

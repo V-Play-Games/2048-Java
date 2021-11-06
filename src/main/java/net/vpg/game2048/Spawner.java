@@ -32,4 +32,8 @@ public class Spawner {
     public CellType spawn() {
         return spawnables.get(random.nextInt(size));
     }
+
+    public void spawn(Cell cell) {
+        cell.setType(spawn());
+    }
 }

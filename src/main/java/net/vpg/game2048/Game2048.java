@@ -1,8 +1,14 @@
 package net.vpg.game2048;
 
+import java.util.Optional;
 import java.util.Scanner;
 
+import static net.vpg.game2048.Move.*;
+
 public class Game2048 {
+    public static final Optional<String> WIN = Optional.of("You won!");
+    public static final Optional<String> LOSE = Optional.of("You are out of moves! Game Over.");
+
     public static void main(String[] args) {
         String help = "Commands:\n" +
             "U to swipe up\n" +
@@ -17,33 +23,50 @@ public class Game2048 {
         board.spawn();
         board.spawn();
         System.out.println(help);
-        char command;
+        System.out.println(board);
+        boolean playing = true;
         do {
-            System.out.println(board);
-            command = in.next().charAt(0);
-            if (command == 'E' || command == 'e') {
-                break;
-            } else if (command == 'H' || command == 'h') {
-                System.out.println(help);
-            } else {
-                Move move = Move.fromKey(command);
-                if (move == null) {
+            switch (in.next().charAt(0)) {
+                case 'E':
+                case 'e':
+                    playing = false;
+                    break;
+                case 'H':
+                case 'h':
+                    System.out.println(help);
+                    break;
+                case 'u':
+                case 'U':
+                    playing = move(board, UP);
+                    break;
+                case 'd':
+                case 'D':
+                    playing = move(board, DOWN);
+                    break;
+                case 'l':
+                case 'L':
+                    playing = move(board, LEFT);
+                    break;
+                case 'r':
+                case 'R':
+                    playing = move(board, RIGHT);
+                    break;
+                default:
                     System.out.println("Invalid Command!");
-                    continue;
-                }
-                board.move(move);
-                if (board.checkWin()) {
-                    System.out.println(board);
-                    System.out.println("You won!");
                     break;
-                }
-                if (board.checkLose()) {
-                    System.out.println(board);
-                    System.out.println("You are out of moves! Game Over.");
-                    break;
-                }
             }
-        } while (true);
+        } while (playing);
         System.out.println("Thanks for playing!");
+    }
+
+    public static boolean move(Board board, Move move) {
+        board.move(move);
+        System.out.println(board);
+        System.out.println("Score: " + board.getScore());
+        boolean win = board.checkWin();
+        boolean lose = board.checkLose();
+        WIN.filter(s -> win).ifPresent(System.out::println);
+        LOSE.filter(s -> lose).ifPresent(System.out::println);
+        return !win && !lose;
     }
 }

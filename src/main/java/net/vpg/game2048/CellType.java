@@ -14,7 +14,7 @@ public enum CellType {
     C1024(1024, "1024", false, 0, false),
     C2048(2048, "2048", false, 0, true );
 
-    static final CellType[] values = values();
+    private static final CellType[] values = values();
     final String formatted;
     final int value;
     final boolean spawn;
@@ -31,10 +31,8 @@ public enum CellType {
 
     @SuppressWarnings("StatementWithEmptyBody")
     public static CellType forValue(int value) {
-        assert value % 2 == 0;
         int i = 0;
         while (i < values.length && values[++i].value != value) ;
-        assert i != values.length;
         return values[i];
     }
 
