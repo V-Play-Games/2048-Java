@@ -1,22 +1,19 @@
 package net.vpg.game2048;
 
-import java.util.Optional;
 import java.util.Scanner;
 
 import static net.vpg.game2048.Move.*;
 
 public class Game2048 {
-    public static final Optional<String> WIN = Optional.of("You won!");
-    public static final Optional<String> LOSE = Optional.of("You are out of moves! Game Over.");
-
     public static void main(String[] args) {
-        String help = "Commands:\n" +
-            "U to swipe up\n" +
-            "D to swipe down\n" +
-            "L to swipe left\n" +
-            "R to swipe right\n" +
-            "E to end the game\n" +
-            "H for help";
+        String help = """
+            Commands:
+            U to swipe up
+            D to swipe down
+            L to swipe left
+            R to swipe right
+            E to end the game
+            H for help""";
         Scanner in = new Scanner(System.in);
         System.out.println("Enter size of board");
         Board board = new Board(in.nextInt());
@@ -26,34 +23,14 @@ public class Game2048 {
         System.out.println(board);
         boolean playing = true;
         do {
-            switch (in.next().charAt(0)) {
-                case 'E':
-                case 'e':
-                    playing = false;
-                    break;
-                case 'H':
-                case 'h':
-                    System.out.println(help);
-                    break;
-                case 'u':
-                case 'U':
-                    playing = move(board, UP);
-                    break;
-                case 'd':
-                case 'D':
-                    playing = move(board, DOWN);
-                    break;
-                case 'l':
-                case 'L':
-                    playing = move(board, LEFT);
-                    break;
-                case 'r':
-                case 'R':
-                    playing = move(board, RIGHT);
-                    break;
-                default:
-                    System.out.println("Invalid Command!");
-                    break;
+            switch (in.next().toLowerCase().charAt(0)) {
+                case 'e' -> playing = false;
+                case 'h' -> System.out.println(help);
+                case 'u' -> playing = move(board, UP);
+                case 'd' -> playing = move(board, DOWN);
+                case 'l' -> playing = move(board, LEFT);
+                case 'r' -> playing = move(board, RIGHT);
+                default -> System.out.println("Invalid Command!");
             }
         } while (playing);
         System.out.println("Thanks for playing!");
@@ -65,8 +42,12 @@ public class Game2048 {
         System.out.println("Score: " + board.getScore());
         boolean win = board.checkWin();
         boolean lose = board.checkLose();
-        WIN.filter(s -> win).ifPresent(System.out::println);
-        LOSE.filter(s -> lose).ifPresent(System.out::println);
+        if (win) {
+            System.out.println("You won!");
+        }
+        if (lose) {
+            System.out.println("You are out of moves! Game Over.");
+        }
         return !win && !lose;
     }
 }

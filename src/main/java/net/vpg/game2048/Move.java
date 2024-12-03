@@ -19,21 +19,12 @@ public enum Move {
     }
 
     public static Move fromKey(char key) {
-        switch (key) {
-            case 'u':
-            case 'U':
-                return UP;
-            case 'd':
-            case 'D':
-                return DOWN;
-            case 'l':
-            case 'L':
-                return LEFT;
-            case 'r':
-            case 'R':
-                return RIGHT;
-            default:
-                return null;
-        }
+        return switch (key) {
+            case 'u', 'U' -> UP;
+            case 'd', 'D' -> DOWN;
+            case 'l', 'L' -> LEFT;
+            case 'r', 'R' -> RIGHT;
+            default -> null;
+        };
     }
 }

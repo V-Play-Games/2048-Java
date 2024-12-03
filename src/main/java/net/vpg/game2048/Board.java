@@ -1,8 +1,8 @@
 package net.vpg.game2048;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class Board {
@@ -38,12 +38,14 @@ public class Board {
             row += move.rowChange;
             column += move.columnChange;
         }
-        spawn();
         int moveScore = getCellsAsStream()
             .filter(Cell::isModified)
             .peek(Cell::removeModifyFlag)
             .mapToInt(Cell::getValue)
             .sum();
+        if (moveScore != 0) {
+            spawn();
+        }
         score += moveScore;
         return moveScore;
     }
@@ -57,9 +59,9 @@ public class Board {
     }
 
     void spawn() {
-        Optional.of(getCellsAsStream().filter(Cell::isEmpty).toArray(Cell[]::new))
-            .filter(emptyCells -> emptyCells.length != 0)
-            .ifPresent(emptyCells -> Spawner.getInstance().spawn(emptyCells[random.nextInt(emptyCells.length)]));
+        Cell[] emptyCells = getCellsAsStream().filter(Cell::isEmpty).toArray(Cell[]::new);
+        if (emptyCells.length != 0)
+            Spawner.getInstance().spawn(emptyCells[random.nextInt(emptyCells.length)]);
     }
 
     public int getScore() {
@@ -67,19 +69,11 @@ public class Board {
     }
 
     public String toString() {
-        StringBuilder tor = new StringBuilder();
-        tor.append('+');
-        tor.append("------+".repeat(size));
-        int firstLineLen = tor.length();
-        tor.append('\n');
-        for (Cell[] row : cells) {
-            tor.append('|');
-            for (Cell cell : row) {
-                tor.append(' ').append(cell.getFormatted()).append(' ').append('|');
-            }
-            tor.append('\n');
-        }
-        tor.append(tor, 0, firstLineLen);
-        return tor.toString();
+        String boundary = "+------".repeat(size) + "+\n";
+        return Arrays.stream(cells)
+            .map(row -> Arrays.stream(row)
+                .map(Cell::getFormatted)
+                .collect(Collectors.joining(" | ", "| ", " |\n")))
+            .collect(Collectors.joining("", boundary, boundary));
     }
 }

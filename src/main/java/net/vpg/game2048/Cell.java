@@ -1,7 +1,5 @@
 package net.vpg.game2048;
 
-import java.util.Optional;
-
 import static net.vpg.game2048.CellType.C0;
 
 public class Cell {
@@ -24,18 +22,10 @@ public class Cell {
     void move(Move move) {
         try {
             switch (move) {
-                case UP:
-                    moveUp();
-                    break;
-                case DOWN:
-                    moveDown();
-                    break;
-                case LEFT:
-                    moveLeft();
-                    break;
-                case RIGHT:
-                    moveRight();
-                    break;
+                case UP -> moveUp();
+                case DOWN -> moveDown();
+                case LEFT -> moveLeft();
+                case RIGHT -> moveRight();
             }
         } catch (ArrayIndexOutOfBoundsException e) {
             // ignore
@@ -96,26 +86,21 @@ public class Cell {
 
     private boolean tryMerge(Cell target) {
         // check if this is empty
-        return !this.isEmpty() &&
-            // or this is equal to target
-            Optional.of(true)
-                .filter(b -> target.isEmpty())
-                .map(b -> {
-                    int targetRow = target.row;
-                    int targetCol = target.column;
-                    target.setCoordinates(this.row, this.column);
-                    this.setCoordinates(targetRow, targetCol);
-                    return true;
-                })
-                .or(() -> Optional.of(false)
-                    .filter(b -> target.type == this.type && !target.modified)
-                    .map(b -> {
-                        target.type = CellType.forValue(this.getValue() * 2);
-                        target.modified = true;
-                        this.type = C0;
-                        return false;
-                    }))
-                .orElse(false);
+        if (this.isEmpty()) {
+            return false;
+        }
+        // or this is equal to the target
+        if (target.isEmpty()) {
+            int targetRow = target.row;
+            int targetCol = target.column;
+            target.setCoordinates(this.row, this.column);
+            this.setCoordinates(targetRow, targetCol);
+        } else if (target.type == this.type && !target.modified) {
+            target.type = CellType.forValue(this.getValue() * 2);
+            target.modified = true;
+            this.type = C0;
+        }
+        return target.isEmpty();
     }
 
     private void setCoordinates(int row, int column) {
