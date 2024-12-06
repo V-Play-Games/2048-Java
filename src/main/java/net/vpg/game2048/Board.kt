@@ -1,79 +1,54 @@
-package net.vpg.game2048;
+package net.vpg.game2048
 
-import java.util.Arrays;
-import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import net.vpg.game2048.Spawner.spawn
+import java.util.*
+import java.util.stream.Collectors
 
-public class Board {
-    final int size;
-    final Random random;
-    Cell[][] cells;
-    int score;
-
-    public Board(int size) {
-        this.size = size;
-        this.cells = new Cell[size][size];
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                new Cell(i, j, this);
-            }
+class Board(val size: Int) {
+    val cells = Array<Array<Cell>>(size) { i ->
+        Array<Cell>(size) { j ->
+            Cell(i, j, this)
         }
-        this.random = new Random();
     }
+    val flatCells = cells.flatten()
+    var score = 0
+    var win = false
+    var lose = false
 
-    public Cell[][] getCells() {
-        return cells;
-    }
-
-    public Stream<Cell> getCellsAsStream() {
-        return Arrays.stream(cells).flatMap(Arrays::stream);
-    }
-
-    public int move(Move move) {
-        int row = move.row * (size - 1);
-        int column = move.column * (size - 1);
-        for (int runs = 0; runs < size; runs++) {
-            cells[row][column].move(move);
-            row += move.rowChange;
-            column += move.columnChange;
+    fun move(move: Move): Int {
+        var row = move.row * (size - 1)
+        var column = move.column * (size - 1)
+        repeat(size, {
+            cells[row][column].move(move)
+            row += move.rowChange
+            column += move.columnChange
+        })
+        val moveScore = flatCells
+            .filter { it.isModified }
+            .onEach { it.isModified = false }
+            .sumOf { it.value }
+        val anyMove = flatCells
+            .filter { it.isMoved }
+            .onEach { it.isMoved = false }
+            .any()
+        if (anyMove) {
+            spawn()
         }
-        int moveScore = getCellsAsStream()
-            .filter(Cell::isModified)
-            .peek(Cell::removeModifyFlag)
-            .mapToInt(Cell::getValue)
-            .sum();
-        if (moveScore != 0) {
-            spawn();
+        win = flatCells.any { it.isFinal }
+        lose = flatCells.none { it.canMove() }
+        score += moveScore
+        return moveScore
+    }
+
+    fun spawn() = flatCells.filter { it.isEmpty }
+        .takeIf { it.isNotEmpty() }
+        ?.random()
+        ?.spawn()
+
+    private val boundary = "+------".repeat(size) + "+\n"
+    override fun toString() = cells.joinToString("", boundary, boundary) {
+        it.joinToString(" | ", "| ", " |\n") {
+            it.formatted
         }
-        score += moveScore;
-        return moveScore;
-    }
-
-    public boolean checkLose() {
-        return getCellsAsStream().noneMatch(Cell::canMove);
-    }
-
-    public boolean checkWin() {
-        return getCellsAsStream().anyMatch(Cell::isFinal);
-    }
-
-    void spawn() {
-        Cell[] emptyCells = getCellsAsStream().filter(Cell::isEmpty).toArray(Cell[]::new);
-        if (emptyCells.length != 0)
-            Spawner.getInstance().spawn(emptyCells[random.nextInt(emptyCells.length)]);
-    }
-
-    public int getScore() {
-        return score;
-    }
-
-    public String toString() {
-        String boundary = "+------".repeat(size) + "+\n";
-        return Arrays.stream(cells)
-            .map(row -> Arrays.stream(row)
-                .map(Cell::getFormatted)
-                .collect(Collectors.joining(" | ", "| ", " |\n")))
-            .collect(Collectors.joining("", boundary, boundary));
     }
 }

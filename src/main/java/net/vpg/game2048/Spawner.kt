@@ -1,39 +1,10 @@
-package net.vpg.game2048;
+package net.vpg.game2048
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
+object Spawner {
+    private val spawns = CellType.entries
+        .filter { it.isSpawn }
+        .map { cell -> List(cell.spawnRate) { cell } }
+        .flatten()
 
-public class Spawner {
-    private static final Spawner instance = new Spawner();
-    final Random random;
-    final List<CellType> spawnables;
-    final int size;
-
-    private Spawner() {
-        this.random = new Random();
-        this.spawnables = Arrays.stream(CellType.values())
-            .filter(CellType::isSpawn)
-            .map(cell -> {
-                CellType[] cells = new CellType[cell.getSpawnRate()];
-                Arrays.fill(cells, cell);
-                return cells;
-            })
-            .flatMap(Arrays::stream)
-            .collect(Collectors.toList());
-        size = spawnables.size();
-    }
-
-    public static Spawner getInstance() {
-        return instance;
-    }
-
-    public CellType spawn() {
-        return spawnables.get(random.nextInt(size));
-    }
-
-    public void spawn(Cell cell) {
-        cell.setType(spawn());
-    }
+    fun Cell.spawn() = spawns.random().also { this.type = it }
 }
