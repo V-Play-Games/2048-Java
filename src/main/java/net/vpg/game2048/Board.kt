@@ -1,8 +1,7 @@
 package net.vpg.game2048
 
 import net.vpg.game2048.Spawner.spawn
-import java.util.*
-import java.util.stream.Collectors
+import kotlin.math.absoluteValue
 
 class Board(val size: Int) {
     val cells = Array<Array<Cell>>(size) { i ->
@@ -20,8 +19,8 @@ class Board(val size: Int) {
         var column = move.column * (size - 1)
         repeat(size, {
             cells[row][column].move(move)
-            row += move.rowChange
-            column += move.columnChange
+            row += move.columnChange.absoluteValue
+            column += move.rowChange.absoluteValue
         })
         val moveScore = flatCells
             .filter { it.isModified }
@@ -44,11 +43,4 @@ class Board(val size: Int) {
         .takeIf { it.isNotEmpty() }
         ?.random()
         ?.spawn()
-
-    private val boundary = "+------".repeat(size) + "+\n"
-    override fun toString() = cells.joinToString("", boundary, boundary) {
-        it.joinToString(" | ", "| ", " |\n") {
-            it.formatted
-        }
-    }
 }
